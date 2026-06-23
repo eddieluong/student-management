@@ -1,39 +1,132 @@
 package repository;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import config.DatabaseConnection;
 import exception.StudentNotFoundException;
 import model.Student;
 
 public class StudentRepository {
-  private Map<Long, Student> students = new HashMap<>();
+  private Student mapRow(ResultSet rs) throws SQLException {
+    Student student = new Student(rs.getInt("age"), rs.getString("name"), rs.getString("email"));
+    student.setId(rs.getLong("id"));
 
-  public void add(Student student) {
-    this.students.putIfAbsent(student.getId(), student);
+    return student;
   }
 
   public List<Student> findAll() {
-    return new ArrayList<>(this.students.values());
+    String sql = "SELECT * FROM students";
+    List<Student> result = new ArrayList<Student>();
+
+    try (
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement statement = conn.prepareStatement(sql);
+    ) {
+      ResultSet rs = statement.executeQuery();
+
+      while(rs.next()) {
+        result.add(mapRow(rs));
+      }
+
+      return result;
+
+    } catch (SQLException e) {
+      throw new RuntimeException("Lấy danh sách học sinh thất bại", e);
+    }
   }
 
   public Optional<Student> findById(Long id) {
-    return Optional.ofNullable(this.students.get(id));
-  }
+    String sql = "SELECT * FROM students WHERE id = ?";
 
-  public void update(Student student) {
-    if (!this.students.containsKey((student.getId()))) {
-      throw new StudentNotFoundException(student.getId());
+    try (
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement statement = conn.prepareStatement(sql);
+    ) {
+      statement.setLong(1, id);
+      ResultSet rs = statement.executeQuery();
+
+      if (rs.next()) {
+        return Optional.of(mapRow(rs));
+      }
+      return Optional.empty();
+
+    } catch (SQLException e) {
+      throw new RuntimeException("Lấy thông tin học sinh chi tiết thất bại", e);
     }
 
-    this.students.put(student.getId(), student);
   }
 
-  public void delete(Long id) {
-    if (!this.students.containsKey(id))
-      throw new StudentNotFoundException(id);
+  // return user id deleted
+  public Long delete(Long id) {
+    String sql = "DELETE FROM students WHERE id = ?";
 
-    this.students.remove(id);
+    try (
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement statement = conn.prepareStatement(sql);
+    ) {
+      statement.setLong(1, id);
+      int rowDeleted = statement.executeUpdate();
+
+      if (rowDeleted > 0) {
+        return id;
+      }
+
+      throw new StudentNotFoundException(id);
+    } catch (SQLException e) {
+      throw new RuntimeException("Xóa học sinh thất bại", e);
+    }
+  }
+
+  public Student add(Student student) {
+    String sql = "INSERT INTO students(age, name, email) VALUES (?, ?, ?) RETURNING *";
+
+    try (
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement statement = conn.prepareStatement(sql);
+    ) {
+      statement.setInt(1, student.getAge());
+      statement.setString(2, student.getName());
+      statement.setString(3, student.getEmail());
+
+      ResultSet rs = statement.executeQuery();
+
+      if (rs.next()) {
+        return mapRow(rs);
+      }
+
+      throw new RuntimeException("Thêm học sinh mới thất bại");
+    } catch (SQLException e) {
+      throw new RuntimeException("Thêm học sinh mới thất bại", e);
+    }
+  }
+
+  public Student update(Student student) {
+    String sql = "UPDATE students SET age = ?, name = ?, email = ? WHERE id = ? RETURNING *";
+
+    try (
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement statement = conn.prepareStatement(sql);
+    ) {
+      statement.setInt(1, student.getAge());
+      statement.setString(2, student.getName());
+      statement.setString(3, student.getEmail());
+      statement.setLong(4, student.getId());
+
+      ResultSet rs = statement.executeQuery();
+
+      if (rs.next()) {
+        return mapRow(rs);
+      }
+
+      throw new StudentNotFoundException(student.getId());
+    } catch (SQLException e) {
+      throw new RuntimeException("Lỗi cập nhật thông tin học sinh", e);
+    }
   }
 }

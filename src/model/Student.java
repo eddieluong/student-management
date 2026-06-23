@@ -2,15 +2,11 @@ package model;
 
 public class Student {
   private Long id;
-  private static Long counter = 0L;
   private String name;
   private String email;
   private int age;
 
   public Student(int age, String name, String email) {
-    counter += 1;
-
-    this.id = counter;
     this.name = name;
     this.email = email;
     this.age = age;
@@ -57,6 +53,4 @@ public class Student {
   public void setEmail(String email) {
     this.email = email;
   }
-
-
 }
