@@ -1,5 +1,9 @@
-package repository;
+package com.honglv.studentmanagement.repository;
+import com.honglv.studentmanagement.exception.StudentNotFoundException;
+import com.honglv.studentmanagement.model.Student;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,11 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import config.DatabaseConnection;
-import exception.StudentNotFoundException;
-import model.Student;
-
+@Repository
 public class StudentRepository {
+  private final DataSource dataSource;
+
+  public StudentRepository(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
+
   private Student mapRow(ResultSet rs) throws SQLException {
     Student student = new Student(rs.getInt("age"), rs.getString("name"), rs.getString("email"));
     student.setId(rs.getLong("id"));
@@ -25,8 +32,8 @@ public class StudentRepository {
     List<Student> result = new ArrayList<Student>();
 
     try (
-      Connection conn = DatabaseConnection.getConnection();
-      PreparedStatement statement = conn.prepareStatement(sql);
+            Connection conn = dataSource.getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql);
     ) {
       ResultSet rs = statement.executeQuery();
 
@@ -45,7 +52,7 @@ public class StudentRepository {
     String sql = "SELECT * FROM students WHERE id = ?";
 
     try (
-      Connection conn = DatabaseConnection.getConnection();
+      Connection conn = dataSource.getConnection();
       PreparedStatement statement = conn.prepareStatement(sql);
     ) {
       statement.setLong(1, id);
@@ -67,7 +74,7 @@ public class StudentRepository {
     String sql = "DELETE FROM students WHERE id = ?";
 
     try (
-      Connection conn = DatabaseConnection.getConnection();
+      Connection conn = dataSource.getConnection();
       PreparedStatement statement = conn.prepareStatement(sql);
     ) {
       statement.setLong(1, id);
@@ -87,7 +94,7 @@ public class StudentRepository {
     String sql = "INSERT INTO students(age, name, email) VALUES (?, ?, ?) RETURNING *";
 
     try (
-      Connection conn = DatabaseConnection.getConnection();
+      Connection conn = dataSource.getConnection();
       PreparedStatement statement = conn.prepareStatement(sql);
     ) {
       statement.setInt(1, student.getAge());
@@ -110,7 +117,7 @@ public class StudentRepository {
     String sql = "UPDATE students SET age = ?, name = ?, email = ? WHERE id = ? RETURNING *";
 
     try (
-      Connection conn = DatabaseConnection.getConnection();
+      Connection conn = dataSource.getConnection();
       PreparedStatement statement = conn.prepareStatement(sql);
     ) {
       statement.setInt(1, student.getAge());

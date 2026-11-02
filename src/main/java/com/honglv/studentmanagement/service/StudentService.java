@@ -1,13 +1,18 @@
-package service;
+package com.honglv.studentmanagement.service;
 import java.util.List;
-import exception.InvalidStudentAgeException;
-import exception.StudentEmailAlreadyExistException;
-import exception.StudentNotFoundException;
-import model.Student;
-import repository.StudentRepository;
 
+import com.honglv.studentmanagement.exception.StudentEmailAlreadyExistException;
+import com.honglv.studentmanagement.exception.StudentNotFoundException;
+import com.honglv.studentmanagement.model.Student;
+import com.honglv.studentmanagement.repository.StudentRepository;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+@Service
+@Validated
 public class StudentService {
-  private StudentRepository repository;
+  private final StudentRepository repository;
 
   public StudentService(StudentRepository repository) {
     this.repository = repository;
@@ -19,20 +24,12 @@ public class StudentService {
     return students.stream().anyMatch(st -> st.getEmail().equals(email) && !st.getId().equals(excludeId));
   }
 
-  private boolean isInvalidAge(int age) {
-    return age < 18 || age > 30;
-  }
-
-  public void add(Student student) {
-    if (isInvalidAge(student.getAge())) {
-      throw new InvalidStudentAgeException();
-    }
-
+  public Student add(@Valid Student student) {
     if (isDuplicateEmail(student.getEmail(), null)) {
       throw new StudentEmailAlreadyExistException();
     }
 
-    repository.add(student);
+    return repository.add(student);
   }
 
   public List<Student> getAll() {
@@ -45,16 +42,13 @@ public class StudentService {
     return student;
   }
 
-  public void update(Student student) {
-    if (isInvalidAge(student.getAge())) {
-      throw new InvalidStudentAgeException();
-    }
+  public Student update(@Valid Student student) {
 
     if (this.isDuplicateEmail(student.getEmail(), student.getId())) {
       throw new StudentEmailAlreadyExistException();
     }
 
-    repository.update(student);
+    return repository.update(student);
   }
 
   public void delete(Long id) {
