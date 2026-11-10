@@ -45,4 +45,9 @@ public class StudentRestController {
         studentService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/batch")
+    public List<Student> addAll(@RequestBody List<Student> students) {
+        return studentService.addAll(students);
+    }
 }

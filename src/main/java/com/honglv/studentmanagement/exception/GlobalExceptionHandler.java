@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleError(Exception e) {
         log.error("Unexpected error", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Some thing went wrong! Internal Server Error");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Some thing went wrong");
     }
 
     @Override
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ProblemDetail body = ex.getBody();
         body.setDetail("Validation failed");
-        body.setProperty("error", errors);
+        body.setProperty("errors", errors);
         log.debug("Unexpected error", ex);
 
 
@@ -73,4 +74,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return body;
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrity(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "Data conflicts with an existing record");
+    }
+
 }
