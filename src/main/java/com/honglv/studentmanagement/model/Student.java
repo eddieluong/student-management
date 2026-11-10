@@ -1,17 +1,26 @@
 package com.honglv.studentmanagement.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+@Entity
+@Table(name = "students")
 public class Student {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @NotBlank(message = "Name is required")
   private String name;
+
   @NotBlank(message = "Email is required")
   @Email(message = "Email format is invalid")
   private String email;
+
   @Min(value = 18, message = "Age must be at least 18")
   @Max(value = 30, message = "Age must be at most 30")
   private int age;
@@ -22,6 +31,8 @@ public class Student {
     this.age = age;
   }
 
+  protected Student() {}
+
   @Override
   public String toString() {
     return "Student{"+
@@ -31,6 +42,7 @@ public class Student {
       ", age=" + age +
       '}';
   }
+
 
   public int getAge() {
     return age;
