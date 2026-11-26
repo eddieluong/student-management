@@ -2,6 +2,7 @@ package com.honglv.studentmanagement.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.honglv.studentmanagement.dto.StudentResponse;
 import com.honglv.studentmanagement.exception.StudentEmailAlreadyExistException;
 import com.honglv.studentmanagement.exception.StudentNotFoundException;
 import com.honglv.studentmanagement.model.Student;
@@ -45,13 +46,15 @@ public class StudentService {
   }
 
   @Transactional(readOnly = true)
-  public List<Student> getAll() {
-    return repository.findAll();
+  public List<StudentResponse> getAll() {
+    return repository.findAll().stream().map(StudentResponse::from).toList();
   }
 
   @Transactional(readOnly = true)
-  public Student getDetail(Long id) {
-    return repository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
+  public StudentResponse getDetail(Long id) {
+    Student student = repository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
+
+    return StudentResponse.from(student);
   }
 
   public Student update(@Valid Student student) {

@@ -1,5 +1,6 @@
 package com.honglv.studentmanagement.controller;
 
+import com.honglv.studentmanagement.dto.StudentResponse;
 import com.honglv.studentmanagement.model.Student;
 import com.honglv.studentmanagement.service.StudentService;
 import jakarta.validation.Valid;
@@ -19,12 +20,12 @@ public class StudentRestController {
     }
 
     @GetMapping
-    public List<Student> getAll() {
+    public List<StudentResponse> getAll() {
         return studentService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Student getDetail(@PathVariable Long id) {
+    public StudentResponse getDetail(@PathVariable Long id) {
         return studentService.getDetail(id);
     }
 
