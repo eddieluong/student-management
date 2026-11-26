@@ -34,7 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleError(Exception e) {
         log.error("Unexpected error", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Some thing went wrong");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
     }
 
     @Override
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail body = ex.getBody();
         body.setDetail("Validation failed");
         body.setProperty("errors", errors);
-        log.debug("Unexpected error", ex);
+        log.debug("Validation failed: {}", errors);
 
 
         return handleExceptionInternal(ex, body, headers, status, request);

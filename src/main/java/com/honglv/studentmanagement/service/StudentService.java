@@ -22,9 +22,9 @@ public class StudentService {
   }
 
   public Student add(@Valid Student student) {
-//    if (repository.existsByEmail(student.getEmail())) {
-//      throw new StudentEmailAlreadyExistException();
-//    }
+    if (repository.existsByEmail(student.getEmail())) {
+      throw new StudentEmailAlreadyExistException();
+    }
 
     student.setId(null);
     return repository.save(student);
