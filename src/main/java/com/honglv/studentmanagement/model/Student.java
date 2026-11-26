@@ -24,12 +24,12 @@ public class Student {
   @Column(name = "age")
   @Min(value = 18, message = "Age must be at least 18")
   @Max(value = 30, message = "Age must be at most 30")
-  private int studentAge;
+  private int age;
 
   public Student(int age, String name, String email) {
     this.name = name;
     this.email = email;
-    this.studentAge = age;
+    this.age = age;
   }
 
   protected Student() {}
@@ -40,17 +40,17 @@ public class Student {
       "id=" + id +
       ", name='" + name + '\'' +
       ", email='" + email + '\'' +
-      ", age=" + studentAge +
+      ", age=" + age +
       '}';
   }
 
 
-  public int getStudentAge() {
-    return studentAge;
+  public int getAge() {
+    return age;
   }
 
-  public void setStudentAge(int studentAge) {
-    this.studentAge = studentAge;
+  public void setAge(int age) {
+    this.age = age;
   }
 
   public Long getId() {

@@ -7,7 +7,7 @@ public record StudentResponse(Long id, String name, String email, int age) {
                 student.getId(),
                 student.getName(),
                 student.getEmail(),
-                student.getStudentAge()
+                student.getAge()
         );
     }
 }
